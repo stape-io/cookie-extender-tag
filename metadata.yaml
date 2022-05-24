@@ -1,4 +1,6 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 9f66679dfac72d7baa9a75adbeaa2b21e87da200
+    changeNotes: Add backup cookies.
   - sha: f7d3c512130ff006dd832a26c6db910f6411c001
     changeNotes: Initial release.
