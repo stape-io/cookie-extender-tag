@@ -31,6 +31,21 @@ ___TEMPLATE_PARAMETERS___
 [
   {
     "type": "GROUP",
+    "name": "options",
+    "groupStyle": "NO_ZIPPY",
+    "subParams": [
+      {
+        "type": "CHECKBOX",
+        "name": "createBackup",
+        "checkboxText": "Create backup cookies and restore them in case main cookies are not found",
+        "simpleValueType": true,
+        "defaultValue": true,
+        "help": "Creates new backup cookies with the \u0027_backup\u0027 added at the end of a cookie name. For example _fbp_backup\n\u003cbr\u003e\u003cbr\u003e\nThis can be useful when js script overrides cookies and shortens cookie lifetime."
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
     "name": "cookiesGroup",
     "displayName": "Add cookies whose lifetime needs to be changed",
     "groupStyle": "NO_ZIPPY",
@@ -96,20 +111,38 @@ if (data.cookies && data.cookies.length > 0) {
 
         if (cookies && cookies.length > 0) {
             cookies.forEach(function (cookieValue) {
-                setCookie(cookieObject.name, cookieValue, {
-                    domain: 'auto',
-                    path: '/',
-                    samesite: 'Lax',
-                    secure: true,
-                    'max-age': cookieObject.lifetime,
-                    httpOnly: false
-                }, true);
+                updateCookie(cookieObject.name, cookieValue, cookieObject.lifetime);
+
+                if (data.createBackup) {
+                    updateCookie(cookieObject.name+'_backup', cookieValue, cookieObject.lifetime);
+                }
             });
+        } else if (data.createBackup) {
+            let backupCookies = getCookieValues(cookieObject.name+'_backup', true);
+
+            if (backupCookies && backupCookies.length > 0) {
+                backupCookies.forEach(function (cookieValue) {
+                    updateCookie(cookieObject.name, cookieValue, cookieObject.lifetime);
+                    updateCookie(cookieObject.name+'_backup', cookieValue, cookieObject.lifetime);
+                });
+            }
         }
     });
 }
 
 data.gtmOnSuccess();
+
+
+function updateCookie(name, value, lifetime) {
+    setCookie(name, value, {
+        domain: 'auto',
+        path: '/',
+        samesite: 'Lax',
+        secure: true,
+        'max-age': lifetime,
+        httpOnly: false
+    }, true);
+}
 
 
 ___SERVER_PERMISSIONS___
